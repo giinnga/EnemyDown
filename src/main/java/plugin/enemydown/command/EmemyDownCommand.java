@@ -8,6 +8,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Zoglin;
 
 public class EmemyDownCommand implements CommandExecutor {
 
@@ -19,15 +20,29 @@ public class EmemyDownCommand implements CommandExecutor {
       player.setHealth(20);
       player.setFoodLevel(20);
 
-      Location playerLocation = player.getLocation();
-      double x = playerLocation.getX();
-      double y = playerLocation.getY();
-      double z = playerLocation.getZ();
-      int random = new SplittableRandom().nextInt(15) - 7;
-      Location enemySpawnLocation = new Location(world, (x + random), y , (z + random));
-
-      world.spawnEntity(enemySpawnLocation, EntityType.ZOMBIE);
+      world.spawnEntity(getEnemySpawnLocation(player, world), EntityType.ZOMBIE);
     }
     return false;
+  }
+
+  /**
+   * 敵の出現場所を取得します。
+   * 出現エリアはX軸とZ軸は自分の位置からプラス、ランダムで-7から7までの値が設定されます。
+   * Y軸はプレイヤーと同じ位置になります。
+   *
+   * @param player　コマンドを実行したプレイヤー
+   * @param world　 コマンドを実行したプレイヤーが所属するワールド
+   * @return 敵の出現場所
+   */
+  private Location getEnemySpawnLocation(Player player, World world) {
+    Location playerLocation = player.getLocation();
+    int randomX = new SplittableRandom().nextInt(15) - 7;
+    int randomZ = new SplittableRandom().nextInt(15) - 7;
+
+    double x = playerLocation.getX() + randomX;
+    double y = playerLocation.getY();
+    double z = playerLocation.getZ() + randomZ;
+
+    return new Location(world, x , y , z);
   }
 }
