@@ -22,10 +22,7 @@ public class EmemyDownCommand implements CommandExecutor {
       player.setHealth(20);
       player.setFoodLevel(20);
 
-      List<EntityType> enemyList = List.of(EntityType.ZOMBIE, EntityType.SKELETON);
-      int random = new SplittableRandom().nextInt(2);
-
-      world.spawnEntity(getEnemySpawnLocation(player, world), enemyList.get(random));
+      world.spawnEntity(getEnemySpawnLocation(player, world), getEnemy());
     }
     return false;
   }
@@ -50,4 +47,14 @@ public class EmemyDownCommand implements CommandExecutor {
 
     return new Location(world, x , y , z);
   }
+
+  /**
+   * ランダムで敵を抽出して、その結果の敵を取得します。
+   * @return 敵
+   */
+  private EntityType getEnemy() {
+    List<EntityType> enemyList = List.of(EntityType.ZOMBIE, EntityType.SKELETON);
+    return enemyList.get(new SplittableRandom().nextInt(2));
+  }
+
 }
