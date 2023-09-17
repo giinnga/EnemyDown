@@ -1,11 +1,13 @@
 package plugin.enemydown.command;
 
+import java.util.List;
 import java.util.SplittableRandom;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zoglin;
@@ -20,7 +22,10 @@ public class EmemyDownCommand implements CommandExecutor {
       player.setHealth(20);
       player.setFoodLevel(20);
 
-      world.spawnEntity(getEnemySpawnLocation(player, world), EntityType.ZOMBIE);
+      List<EntityType> enemyList = List.of(EntityType.ZOMBIE, EntityType.SKELETON);
+      int random = new SplittableRandom().nextInt(2);
+
+      world.spawnEntity(getEnemySpawnLocation(player, world), enemyList.get(random));
     }
     return false;
   }
