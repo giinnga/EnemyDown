@@ -1,5 +1,6 @@
 package plugin.enemydown.command;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SplittableRandom;
@@ -16,16 +17,33 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import plugin.enemydown.data.PlayerScore;
 
 public class EnemyDownCommand implements CommandExecutor, Listener {
 
-  private Player player;
-  private int score;
+  private List<PlayerScore> playerScoreList = new ArrayList<>();
+
 
   @Override
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     if(sender instanceof Player player) {
-      this.player = player;
+      if(playerScoreList.isEmpty()) {
+        PlayerScore newPlayer = new PlayerScore();
+        newPlayer.setPlayerName(player.getName());
+        playerScoreList.add(newPlayer);
+      } else {
+        for(PlayerScore playerscore : playerScoreList) {
+          if(!playerscore.getPlayerName().equals(player.getName())) {
+            PlayerScore newPlayer = new PlayerScore();
+            newPlayer.setPlayerName(player.getName());
+            playerScoreList.add(newPlayer);
+          }
+
+        }
+      }
+
+
+
       World world = player.getWorld();
 
      //プレイヤーの状態を初期化する。（体力と空腹度を最大値にする）
