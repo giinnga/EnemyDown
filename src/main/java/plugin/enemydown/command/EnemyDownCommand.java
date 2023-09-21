@@ -28,20 +28,15 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     if(sender instanceof Player player) {
       if(playerScoreList.isEmpty()) {
-        PlayerScore newPlayer = new PlayerScore();
-        newPlayer.setPlayerName(player.getName());
-        playerScoreList.add(newPlayer);
+        addNewPlayer(player);
       } else {
         for(PlayerScore playerscore : playerScoreList) {
           if(!playerscore.getPlayerName().equals(player.getName())) {
-            PlayerScore newPlayer = new PlayerScore();
-            newPlayer.setPlayerName(player.getName());
-            playerScoreList.add(newPlayer);
+            addNewPlayer(player);
           }
 
         }
       }
-
 
 
       World world = player.getWorld();
@@ -54,20 +49,29 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
     return false;
   }
 
+
   @EventHandler
   public void onEnemyDeath(EntityDeathEvent e) {
     Player player = e.getEntity().getKiller();
-    if(Objects.isNull(player)) {
+    if (Objects.isNull(player) || playerScoreList.isEmpty()) {
       return;
     }
-    if(Objects.isNull(this.player)) {
-      return;
+    for(PlayerScore playerscore : playerScoreList) {
+      if(playerscore.getPlayerName().equals(player.getName())) {
+        playerscore.setScore(playerscore.getScore() + 10);
+        player.sendMessage("敵を倒した！　現在のスコアは" + playerscore.getScore() + "点！" );
+      }
     }
+  }
 
-    if(this.player.getName().equals(player.getName())) {
-      score += 10;
-      player.sendMessage("敵を倒した！　現在のスコアは" + score + "点！" );
-    }
+  /**
+   * 新規のプレイヤー情報をリストに追加します。
+   * @param player　コマンドを実行したプレイヤー
+   */
+  private void addNewPlayer(Player player) {
+    PlayerScore newPlayer = new PlayerScore();
+    newPlayer.setPlayerName(player.getName());
+    playerScoreList.add(newPlayer);
   }
 
 
