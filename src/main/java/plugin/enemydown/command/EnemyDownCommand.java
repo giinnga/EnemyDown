@@ -72,15 +72,12 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
 
     for(PlayerScore playerscore : playerScoreList) {
       if(playerscore.getPlayerName().equals(player.getName())) {
-        int point = 0;
-        if(EntityType.ZOMBIE.equals(enemy.getType())) {
-          point = 10;
-        } else if(EntityType.SKELETON.equals(enemy.getType())) {
-          point = 20;
-        } else if (EntityType.WITCH.equals(enemy.getType())) {
-          point = 30;
-        }
-
+        int point = switch (enemy.getType()) {
+          case ZOMBIE -> 10;
+          case SKELETON -> 20;
+          case WITCH -> 30;
+          default -> 0;
+        };
 
         playerscore.setScore(playerscore.getScore() + point);
         player.sendMessage("敵を倒した！　現在のスコアは" + playerscore.getScore() + "点！");
