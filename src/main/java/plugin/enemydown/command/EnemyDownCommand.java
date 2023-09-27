@@ -23,7 +23,7 @@ import org.bukkit.inventory.PlayerInventory;
 import plugin.enemydown.Main;
 import plugin.enemydown.data.PlayerScore;
 
-public class EnemyDownCommand implements CommandExecutor, Listener {
+public class EnemyDownCommand extends BaseCommand implements Listener {
 
   private Main main;
   private List<PlayerScore> playerScoreList = new ArrayList<>();
@@ -65,6 +65,16 @@ public class EnemyDownCommand implements CommandExecutor, Listener {
       }, 0, 5 * 20);
 
     }
+    return false;
+  }
+
+  @Override
+  public boolean onExecutePlayerCommand(Player player) {
+    return false;
+  }
+
+  @Override
+  public boolean onExecuteNPCCommand(CommandSender sender) {
     return false;
   }
 
