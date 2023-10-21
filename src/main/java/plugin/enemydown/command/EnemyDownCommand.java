@@ -3,6 +3,7 @@ package plugin.enemydown.command;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.SplittableRandom;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -31,6 +32,7 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
   public static final int GAME_TIME = 20;
   private Main main;
   private List<PlayerScore> playerScoreList = new ArrayList<>();
+  private List<Entity> spawnEntityList = new ArrayList<>();
 
 
   public EnemyDownCommand(Main main) {
@@ -65,18 +67,20 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
       return;
     }
 
-    for(PlayerScore playerscore : playerScoreList) {
-      if(playerscore.getPlayerName().equals(player.getName())) {
-        int point = switch (enemy.getType()) {
-          case ZOMBIE, SPIDER -> 10;
-          case SKELETON -> 20;
-          default -> 0;
-        };
+    playerScoreList.stream()
+        .filter(p -> p.getPlayerName().equals(player.getName()))
+        .findFirst()
+        .ifPresent(p -> {
+          int point = switch (enemy.getType()) {
+            case ZOMBIE, SPIDER -> 10;
+            case SKELETON -> 20;
+            default -> 0;
+          };
 
-        playerscore.setScore(playerscore.getScore() + point);
-        player.sendMessage("敵を倒した！　現在のスコアは" + playerscore.getScore() + "点！");
-      }
-    }
+          p.setScore(p.getScore() + point);
+          player.sendMessage("敵を倒した！　現在のスコアは" + p.getScore() + "点！");
+
+        });
   }
 
   /**
@@ -89,6 +93,7 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
     PlayerScore playerScore = new PlayerScore(player.getName());
     if(playerScoreList.isEmpty()) {
       playerScore = addNewPlayer(player);
+      return playerScore;
     } else {
       playerScore = playerScoreList.stream()
           .findFirst()
@@ -97,6 +102,7 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
           : addNewPlayer(player)).orElse(playerScore);  //:→false
     }
     playerScore.setGameTime(GAME_TIME);
+    playerScore.setScore(0);
     return playerScore;
   }
 
@@ -132,26 +138,24 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
   /**
    * ゲームを実行します。規定の時間内に敵を倒すとスコアが加算されます。合計スコアを時間経過後に表示します。
    * @param player　コマンドを実行したプレイヤー
-   * @param nowPlayer　プレイヤースコア情報
+   * @param nowPlayerScore　プレイヤースコア情報
    */
-  private void gamePlay(Player player, PlayerScore nowPlayer) {
+  private void gamePlay(Player player, PlayerScore nowPlayerScore) {
     Bukkit.getScheduler().runTaskTimer(main, Runnable -> {
-      if(nowPlayer.getGameTime() <= 0) {
+      if(nowPlayerScore.getGameTime() <= 0) {
         Runnable.cancel();
-        player.sendTitle("ゲームが終了しました。",
-            nowPlayer.getPlayerName() + " 合計 " + nowPlayer.getScore() + "点！",
+
+        player.sendTitle(
+            "ゲームが終了しました。",
+            nowPlayerScore.getPlayerName() + " 合計 " + nowPlayerScore.getScore() + "点！",
             0, 60, 0);
-        nowPlayer.setScore(0);
-        List<Entity> nearbyEnemies = player.getNearbyEntities(50, 0, 50);
-        for(Entity enemy : nearbyEnemies) {
-          switch (enemy.getType()) {
-            case ZOMBIE, SKELETON, SPIDER -> enemy.remove();
-          }
-        }
+
+        spawnEntityList.forEach(Entity::remove);
         return;
       }
-      player.getWorld().spawnEntity(getEnemySpawnLocation(player), getEnemy());
-      nowPlayer.setGameTime(nowPlayer.getGameTime() - 5);
+      Entity spawnEntity = player.getWorld().spawnEntity(getEnemySpawnLocation(player), getEnemy());
+      spawnEntityList.add(spawnEntity);
+      nowPlayerScore.setGameTime(nowPlayerScore.getGameTime() - 5);
     }, 0, 5 * 20);
   }
 
