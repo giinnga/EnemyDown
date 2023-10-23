@@ -19,6 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.potion.PotionEffect;
 import plugin.enemydown.Main;
 import plugin.enemydown.data.PlayerScore;
 
@@ -75,8 +76,8 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
         .findFirst()
         .ifPresent(p -> {
           int point = switch (enemy.getType()) {
-            case ZOMBIE, SPIDER -> 10;
-            case SKELETON -> 20;
+            case ZOMBIE -> 10;
+            case SKELETON, WITCH -> 20;
             default -> 0;
           };
 
@@ -106,8 +107,10 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
     }
     playerScore.setGameTime(GAME_TIME);
     playerScore.setScore(0);
+    removePosionEffect(player);
     return playerScore;
   }
+
 
   /**
    * 新規のプレイヤー情報をリストに追加します。
@@ -154,7 +157,9 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
             0, 60, 0);
 
         spawnEntityList.forEach(Entity::remove);
-        spawnEntityList = new ArrayList<>();
+        spawnEntityList.clear();
+
+        removePosionEffect(player);
         return;
       }
       Entity spawnEntity = player.getWorld().spawnEntity(getEnemySpawnLocation(player), getEnemy());
@@ -189,8 +194,18 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
    * @return 敵
    */
   private EntityType getEnemy() {
-    List<EntityType> enemyList = List.of(EntityType.ZOMBIE, EntityType.SKELETON, EntityType.SPIDER);
+    List<EntityType> enemyList = List.of(EntityType.ZOMBIE, EntityType.SKELETON, EntityType.WITCH);
     return enemyList.get(new SplittableRandom().nextInt(enemyList.size()));
+  }
+
+  /**
+   * プレイヤーに設定されている特殊効果を除外します。
+   * @param player コマンドを実行したプレイヤー
+   */
+  private void removePosionEffect(Player player) {
+    player.getActivePotionEffects().stream()
+        .map(PotionEffect::getType)
+        .forEach(player::removePotionEffect);
   }
 
 }
