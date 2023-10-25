@@ -34,7 +34,7 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
 
   public static final int GAME_TIME = 20;
   public static final String EASY = "easy";
-  public static final String NORMAL = "nomal";
+  public static final String NORMAL = "normal";
   public static final String HARD = "hard";
   public static final String NONE = "none";
   private Main main;
@@ -70,7 +70,7 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
    * @return 難易度
    */
   private String getDifficulty(Player player, String[] args) {
-    if (args.length == 1 && EASY.equals(args[0]) || NORMAL.equals(args[0]) || HARD.equals(args[0])) {
+    if (args.length == 1 && (EASY.equals(args[0]) || NORMAL.equals(args[0]) || HARD.equals(args[0]))) {
       return args[0];
     }
     player.sendMessage(ChatColor.RED + "実行できません。コマンド引数の1つ目に難易度設定が必要です。[easy, normal,hard]");
