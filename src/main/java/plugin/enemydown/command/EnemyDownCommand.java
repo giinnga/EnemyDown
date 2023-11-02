@@ -74,14 +74,13 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
       try (SqlSession session = sqlSessionFactory.openSession()) {
         PlayerScoreMapper mapper = session.getMapper(PlayerScoreMapper.class);
         List<PlayerScore> playerScoreList = mapper.selectList();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         for(PlayerScore playerScore : playerScoreList){
-          LocalDateTime date = LocalDateTime.parse(playerScore.getRegisteredAt(), formatter);
           player.sendMessage(playerScore.getId() + " | "
               + playerScore.getPlayerName() + " | "
               + playerScore.getScore() + " | "
               + playerScore.getDifficulty() + " | "
-              + date.format(formatter));
+              + playerScore.getRegisteredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         }
 
@@ -171,7 +170,7 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
     }
     executingPlayer.setGameTime(GAME_TIME);
     executingPlayer.setScore(0);
-    removePosionEffect(player);
+    removePotionEffect(player);
     return executingPlayer;
   }
 
@@ -221,22 +220,23 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
             nowExecutingPlayer.getPlayerName() + " 合計 " + nowExecutingPlayer.getScore() + "点！",
             0, 60, 0);
 
-        try (Connection con = DriverManager.getConnection(
-            "jdbc:mysql://localhost:3306/spigot_server",
-            "root",
-            "rootroot");
-        Statement statement = con.createStatement()) {
-        statement.executeUpdate(
-            "insert player_score(player_name, score, difficulty, registered_at)"
-            + "values('" + nowExecutingPlayer.getPlayerName() + "', " + nowExecutingPlayer.getScore() + ",'" + difficulty + "', now());");
-        } catch (SQLException e) {
-          e.printStackTrace();
-        }
+
 
         spawnEntityList.forEach(Entity::remove);
         spawnEntityList.clear();
 
-        removePosionEffect(player);
+        removePotionEffect(player);
+
+       //スコア登録処理
+        try (SqlSession session = sqlSessionFactory.openSession(true)) {
+          PlayerScoreMapper mapper = session.getMapper(PlayerScoreMapper.class);
+          mapper.insert(
+              new PlayerScore(nowExecutingPlayer.getPlayerName()
+                  , nowExecutingPlayer.getScore()
+                  ,difficulty));
+
+        }
+
         return;
       }
       Entity spawnEntity = player.getWorld().spawnEntity(getEnemySpawnLocation(player), getEnemy(difficulty));
@@ -286,7 +286,7 @@ public class EnemyDownCommand extends BaseCommand implements Listener {
    * プレイヤーに設定されている特殊効果を除外します。
    * @param player コマンドを実行したプレイヤー
    */
-  private void removePosionEffect(Player player) {
+  private void removePotionEffect(Player player) {
     player.getActivePotionEffects().stream()
         .map(PotionEffect::getType)
         .forEach(player::removePotionEffect);
