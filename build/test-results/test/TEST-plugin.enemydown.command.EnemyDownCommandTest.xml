@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="plugin.enemydown.command.EnemyDownCommandTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2023-11-04T02:06:33" hostname="IzutonoMacBook-Air.local" time="0.075">
+  <properties/>
+  <testcase name="getDifficultyに渡す引数のargsの最初の文字列がnomalの時にnomalの文字列が返ること()" classname="plugin.enemydown.command.EnemyDownCommandTest" time="0.068"/>
+  <testcase name="getDifficultyに渡す引数のargsの最初の文字列がeasyの時にeasyの文字列が返ること()" classname="plugin.enemydown.command.EnemyDownCommandTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
